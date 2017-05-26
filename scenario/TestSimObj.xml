@@ -1,0 +1,366 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <activeVariants>
+        <variant>lod1</variant>
+        <variant>lod0</variant>
+    </activeVariants>
+    <upAxisIsZ>false</upAxisIsZ>
+    <entities>
+        <entity>
+            <name>Building</name>
+            <id>FlatBuilding-FFFEE9F0</id>
+            <type />
+            <description />
+            <localTransform>
+                <relToId />
+                <position>
+                    <x>0.00</x>
+                    <y>0.00</y>
+                    <z>0.00</z>
+                </position>
+                <useRotationMatrix>false</useRotationMatrix>
+                <rotationMatrix>
+                    <row1>1.000000 0.000000 0.000000</row1>
+                    <row2>0.000000 1.000000 0.000000</row2>
+                    <row3>0.000000 0.000000 1.000000</row3>
+                </rotationMatrix>
+                <eulerAngles>
+                    <x>0.00</x>
+                    <y>0.00</y>
+                    <z>0.00</z>
+                </eulerAngles>
+                <scale>
+                    <x>1.000</x>
+                    <y>1.000</y>
+                    <z>1.000</z>
+                </scale>
+            </localTransform>
+            <representation>
+                <id />
+                <assetType>AssetBundle</assetType>
+                <assetBundleName>building</assetBundleName>
+                <assetName>FlatBuilding</assetName>
+                <isVisible>true</isVisible>
+                <localTransform>
+                    <relToId>FlatBuilding-FFFEE9F0</relToId>
+                    <position>
+                        <x>0.00</x>
+                        <y>0.00</y>
+                        <z>0.00</z>
+                    </position>
+                    <useRotationMatrix>false</useRotationMatrix>
+                    <rotationMatrix>
+                        <row1>1.000000 0.000000 0.000000</row1>
+                        <row2>0.000000 1.000000 0.000000</row2>
+                        <row3>0.000000 0.000000 1.000000</row3>
+                    </rotationMatrix>
+                    <eulerAngles>
+                        <x>0.00</x>
+                        <y>0.00</y>
+                        <z>0.00</z>
+                    </eulerAngles>
+                    <scale>
+                        <x>1.000</x>
+                        <y>1.000</y>
+                        <z>1.000</z>
+                    </scale>
+                </localTransform>
+            </representation>
+        </entity>
+        <entity>
+            <name>DYNAMIC_RELTO</name>
+            <id>DYNAMIC_RELTO-FFFEFCDA</id>
+            <type />
+            <description />
+            <localTransform>
+                <relToId>FlatBuilding-FFFEE9F0</relToId>
+                <position>
+                    <x>0.00</x>
+                    <y>0.00</y>
+                    <z>0.00</z>
+                </position>
+                <useRotationMatrix>false</useRotationMatrix>
+                <rotationMatrix>
+                    <row1>1.000000 0.000000 0.000000</row1>
+                    <row2>0.000000 1.000000 0.000000</row2>
+                    <row3>0.000000 0.000000 1.000000</row3>
+                </rotationMatrix>
+                <eulerAngles>
+                    <x>0.00</x>
+                    <y>0.00</y>
+                    <z>0.00</z>
+                </eulerAngles>
+                <scale>
+                    <x>1.000</x>
+                    <y>1.000</y>
+                    <z>1.000</z>
+                </scale>
+            </localTransform>
+            <representation>
+                <id />
+                <assetType>Cube</assetType>
+                <isVisible>true</isVisible>
+                <localTransform>
+                    <relToId>DYNAMIC_RELTO-FFFEFCDA</relToId>
+                    <position>
+                        <x>0.00</x>
+                        <y>0.00</y>
+                        <z>0.00</z>
+                    </position>
+                    <useRotationMatrix>false</useRotationMatrix>
+                    <rotationMatrix>
+                        <row1>1.000000 0.000000 0.000000</row1>
+                        <row2>0.000000 1.000000 0.000000</row2>
+                        <row3>0.000000 0.000000 1.000000</row3>
+                    </rotationMatrix>
+                    <eulerAngles>
+                        <x>0.00</x>
+                        <y>0.00</y>
+                        <z>0.00</z>
+                    </eulerAngles>
+                    <scale>
+                        <x>1.000</x>
+                        <y>1.000</y>
+                        <z>1.000</z>
+                    </scale>
+                </localTransform>
+            </representation>
+        </entity>
+        <entity>
+            <name>BOX2</name>
+            <id>BOX2-FFFEF782</id>
+            <type />
+            <description />
+            <localTransform>
+                <relToId>FlatBuilding-FFFEE9F0</relToId>
+                <position>
+                    <x>-5.000</x>
+                    <y>0.500</y>
+                    <z>-4.000</z>
+                </position>
+                <useRotationMatrix>false</useRotationMatrix>
+                <rotationMatrix>
+                    <row1>1.000000 0.000000 0.000000</row1>
+                    <row2>0.000000 1.000000 0.000000</row2>
+                    <row3>0.000000 0.000000 1.000000</row3>
+                </rotationMatrix>
+                <eulerAngles>
+                    <x>0.00</x>
+                    <y>0.00</y>
+                    <z>0.00</z>
+                </eulerAngles>
+                <scale>
+                    <x>1.000</x>
+                    <y>1.000</y>
+                    <z>1.000</z>
+                </scale>
+            </localTransform>
+            <representation>
+                <id />
+                <assetType>Model</assetType>
+                <assetName>models/trolley/trolley.obj</assetName>
+                <isVisible>true</isVisible>
+                <localTransform>
+                    <relToId>BOX2-FFFEF782</relToId>
+                    <position>
+                        <x>0.00</x>
+                        <y>0.00</y>
+                        <z>0.00</z>
+                    </position>
+                    <useRotationMatrix>false</useRotationMatrix>
+                    <rotationMatrix>
+                        <row1>-1.000000 0.000000 0.000000</row1>
+                        <row2>0.000000 1.000000 0.000000</row2>
+                        <row3>0.000000 0.000000 -1.000000</row3>
+                    </rotationMatrix>
+                    <eulerAngles>
+                        <x>0.00</x>
+                        <y>180.00</y>
+                        <z>0.00</z>
+                    </eulerAngles>
+                    <scale>
+                        <x>1.000</x>
+                        <y>1.000</y>
+                        <z>1.000</z>
+                    </scale>
+                </localTransform>
+                <importOptions>
+                    <zUp>true</zUp>
+                    <litDiffuse>false</litDiffuse>
+                    <modelScaling>0.01</modelScaling>
+                    <localPosition>
+                        <x>0</x>
+                        <y>0</y>
+                        <z>0</z>
+                    </localPosition>
+                    <localEulerAngles>
+                        <x>0</x>
+                        <y>180</y>
+                        <z>0</z>
+                    </localEulerAngles>
+                    <localScale>
+                        <x>1</x>
+                        <y>1</y>
+                        <z>1</z>
+                    </localScale>
+                    <reuseLoaded>false</reuseLoaded>
+                </importOptions>
+            </representation>
+        </entity>
+        <entity>
+            <name>BOX1</name>
+            <id>BOX1-FFFEF96E</id>
+            <type />
+            <description />
+            <localTransform>
+                <relToId>FlatBuilding-FFFEE9F0</relToId>
+                <position>
+                    <x>5.000</x>
+                    <y>0.500</y>
+                    <z>0.000</z>
+                </position>
+                <useRotationMatrix>false</useRotationMatrix>
+                <rotationMatrix>
+                    <row1>1.000000 0.000000 0.000000</row1>
+                    <row2>0.000000 1.000000 0.000000</row2>
+                    <row3>0.000000 0.000000 1.000000</row3>
+                </rotationMatrix>
+                <eulerAngles>
+                    <x>0.00</x>
+                    <y>0.00</y>
+                    <z>0.00</z>
+                </eulerAngles>
+                <scale>
+                    <x>1.000</x>
+                    <y>1.000</y>
+                    <z>1.000</z>
+                </scale>
+            </localTransform>
+            <representation>
+                <id />
+                <assetType>Cube</assetType>
+                <isVisible>true</isVisible>
+                <localTransform>
+                    <relToId>BOX1-FFFEF96E</relToId>
+                    <position>
+                        <x>0.00</x>
+                        <y>0.00</y>
+                        <z>0.00</z>
+                    </position>
+                    <useRotationMatrix>false</useRotationMatrix>
+                    <rotationMatrix>
+                        <row1>1.000000 0.000000 0.000000</row1>
+                        <row2>0.000000 1.000000 0.000000</row2>
+                        <row3>0.000000 0.000000 1.000000</row3>
+                    </rotationMatrix>
+                    <eulerAngles>
+                        <x>0.00</x>
+                        <y>0.00</y>
+                        <z>0.00</z>
+                    </eulerAngles>
+                    <scale>
+                        <x>1.000</x>
+                        <y>1.000</y>
+                        <z>1.000</z>
+                    </scale>
+                </localTransform>
+            </representation>
+        </entity>
+        <entity>
+            <name>STATIC_RELTO</name>
+            <id>STATIC_RELTO-FFFECFBA</id>
+            <type />
+            <description />
+            <localTransform>
+                <relToId />
+                <position>
+                    <x>-5.000</x>
+                    <y>0.050</y>
+                    <z>0.000</z>
+                </position>
+                <useRotationMatrix>false</useRotationMatrix>
+                <rotationMatrix>
+                    <row1>1.000000 0.000000 0.000000</row1>
+                    <row2>0.000000 0.000000 -1.000000</row2>
+                    <row3>0.000000 1.000000 0.000000</row3>
+                </rotationMatrix>
+                <eulerAngles>
+                    <x>90.00</x>
+                    <y>0.00</y>
+                    <z>0.00</z>
+                </eulerAngles>
+                <scale>
+                    <x>1.000</x>
+                    <y>1.000</y>
+                    <z>1.000</z>
+                </scale>
+            </localTransform>
+            <representation>
+                <id />
+                <assetType>Quad</assetType>
+                <isVisible>true</isVisible>
+                <localTransform>
+                    <relToId>STATIC_RELTO-FFFECFBA</relToId>
+                    <position>
+                        <x>0.00</x>
+                        <y>0.00</y>
+                        <z>0.00</z>
+                    </position>
+                    <useRotationMatrix>false</useRotationMatrix>
+                    <rotationMatrix>
+                        <row1>1.000000 0.000000 0.000000</row1>
+                        <row2>0.000000 1.000000 0.000000</row2>
+                        <row3>0.000000 0.000000 1.000000</row3>
+                    </rotationMatrix>
+                    <eulerAngles>
+                        <x>0.00</x>
+                        <y>0.00</y>
+                        <z>0.00</z>
+                    </eulerAngles>
+                    <scale>
+                        <x>1.000</x>
+                        <y>1.000</y>
+                        <z>1.000</z>
+                    </scale>
+                </localTransform>
+            </representation>
+        </entity>
+    </entities>
+    <simulation>
+        <historyUri />
+        <historyName>Test Simulation</historyName>
+        <description>Simulation driven animation test</description>
+        <details />
+        <autoStart>false</autoStart>
+        <histories>
+            <history>
+                <entityId>DYNAMIC_RELTO-FFFEFCDA</entityId>
+                <upAxisIsZ>false</upAxisIsZ>
+                <fileName>../scenario/DYNAMIC_RELTO_anim.txt</fileName>
+            </history>
+            <history>
+                <entityId>BOX2-FFFEF782</entityId>
+                <upAxisIsZ>false</upAxisIsZ>
+                <fileName>../scenario/BOX2Anim.txt</fileName>
+            </history>
+            <history>
+                <entityId>BOX1-FFFEF96E</entityId>
+                <upAxisIsZ>false</upAxisIsZ>
+                <fileName>../scenario/BOX1Anim.txt</fileName>
+            </history>
+        </histories>
+    </simulation>
+    <relationships>
+        <relationship xsi:type="inclusion-relationship">
+            <id>FFFB7C94</id>
+            <ownerEntityId>FlatBuilding-FFFEE9F0</ownerEntityId>
+            <subjectEntityId>FlatBuilding-FFFEE9F0</subjectEntityId>
+            <objectEntities>
+                <entityId>BOX1-FFFEF96E</entityId>
+                <entityId>BOX2-FFFEF782</entityId>
+                <entityId>STATIC_RELTO-FFFECFBA</entityId>
+                <entityId>DYNAMIC_RELTO-FFFEFCDA</entityId>
+            </objectEntities>
+        </relationship>
+    </relationships>
+</scenario>
