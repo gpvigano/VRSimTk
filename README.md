@@ -49,12 +49,12 @@ You can find the VRSimTk documentation in [Documentation folder].
 ### Getting Started
 To try this project with Unity press the button **Clone or download** and choose [**Download ZIP**](https://github.com/gpvigano/VRSimTk/archive/WIP.zip). Save and unzip the archive to your hard disk and then you can open it with Unity.
 Open the scene `VRSimTk/Example/XML/TestSim`, choose `AssetBundles/Build AssetBundles` from the Editor menu, and wait until the process finishes.
-Press play in Unity Editor, then press *Load scen* button in the UI. After a while you will be able to control the simulation using the UI on the right side. 
+Press play in Unity Editor, then press *Load scen* button in the UI. After a while you will be able to control the simulation using the UI on the right side.
 
 ### Acknowledgements:
 
-This work was inspired by the previous work carried on in several research projects by [CNR-ITIA](http://www.itia.cnr.it) focused on the Virtual Factory.
-The asset bundle management is a slightly [modified version](https://github.com/gpvigano/AssetBundle_Manager_5.5.0/tree/feat/custom_configuration) for *Unity 5.5.0 Unity's AssetBundle Manager*, thanks to [agentc0re](https://github.com/agentc0re) for his work.  
+This project was inspired by my previous work focused on [GIOVE Virtual Factory](https://link.springer.com/chapter/10.1007/978-1-84996-172-1_12), carried on in several research projects at [CNR-ITIA](http://www.itia.cnr.it).
+The asset bundle management is a slightly [modified version](https://github.com/gpvigano/AssetBundle_Manager_5.5.0/tree/feat/custom_configuration) of *Unity 5.5.0 Unity's AssetBundle Manager*, thanks to [agentc0re](https://github.com/agentc0re), who made [Unity's AssetBundleDemo](https://bitbucket.org/Unity-Technologies/assetbundledemo) (MIT license) available on GitHub and working with Unity 5.5.  
 **This project uses [AsImpL](https://github.com/gpvigano/AsImpL) for loading 3D models at run-time.**
 
 Thanks in advance to all the people who will contribute in any way to this project.
@@ -62,14 +62,13 @@ Thanks in advance to all the people who will contribute in any way to this proje
 
 ### Contributing
 
-Contributions from you are welcome, but please notice that **this is still a work-in-progress**!
+Contributions from you are welcome, but please notice that **this is still a work-in-progress**)!
 
 If you find bugs or you have any new idea for improvements and new features you can raise an issue on GitHub. To open issues or make pull requests please follow the instructions in [CONTRIBUTING.md](https://github.com/gpvigano/VRSimTk/blob/master/CONTRIBUTING.md).
 
 ### License
 
 Code released under the [MIT License](https://github.com/gpvigano/VRSimTk/blob/master/LICENSE.txt).
-
 
 
 [Documentation folder]: https://github.com/gpvigano/VRSimTk/blob/WIP/Documentation/

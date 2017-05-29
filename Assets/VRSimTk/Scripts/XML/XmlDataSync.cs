@@ -89,12 +89,28 @@ namespace VRSimTk
             return scenarioData.entityList.Exists(x => x.id == entityId);
         }
 
+        public override bool ReadScenario(string url)
+        {
+            return DataUtil.ReadFromXml(ref scenarioData, url);
+        }
+
+        public override bool WriteScenario(string url)
+        {
+            if (scenarioData == null)
+            {
+                Debug.LogWarning(GetType() + " - No data to write.");
+                return false;
+            }
+            return DataUtil.WriteToXml(scenarioData, url);
+        }
+
+
         /// <summary>
         /// Update the given game object with the given XML entity data
         /// </summary>
         /// <param name="destGameObject">The given game object to update</param>
         /// <param name="data">The given source XML entity data</param>
-        public void UpdateObject(GameObject destGameObject, VrXmlEntityData data)
+        protected void UpdateObject(GameObject destGameObject, VrXmlEntityData data)
         {
             destGameObject.name = data.name;
             EntityData entityData = destGameObject.GetComponent<EntityData>();
@@ -131,7 +147,7 @@ namespace VRSimTk
             destGameObject.transform.localScale = data.localTransform.scale.Get();
         }
 
-        public VrXmlRelationship ConvertObjectRelationship(Relationship rel)
+        protected VrXmlRelationship ConvertObjectRelationship(Relationship rel)
         {
             VrXmlRelationship xmlRel = null;
             var oneToOne = rel as OneToOneRelationship;
@@ -181,7 +197,7 @@ namespace VRSimTk
             return xmlRel;
         }
 
-        public VrXmlHistoryData ConvertObjectHistory(EntityHistory history)
+        protected VrXmlHistoryData ConvertObjectHistory(EntityHistory history)
         {
             VrXmlHistoryData xmlHistory = new VrXmlHistoryData();
             xmlHistory.entityId = history.GetComponent<EntityData>().id;
@@ -190,7 +206,53 @@ namespace VRSimTk
             return xmlHistory;
         }
 
-        public void UpdateEntity(GameObject sourceGameObject, VrXmlEntityData data)
+        protected VrXmlRepresentation.AssetType ConvertRepresentationPrimType(EntityRepresentation.AssetPrimType assetPrimType)
+        {
+            switch (assetPrimType)
+            {
+                case EntityRepresentation.AssetPrimType.Capsule:
+                    return VrXmlRepresentation.AssetType.Capsule;
+                case EntityRepresentation.AssetPrimType.Cube:
+                    return VrXmlRepresentation.AssetType.Cube;
+                case EntityRepresentation.AssetPrimType.Cylinder:
+                    return VrXmlRepresentation.AssetType.Cylinder;
+                case EntityRepresentation.AssetPrimType.Plane:
+                    return VrXmlRepresentation.AssetType.Plane;
+                case EntityRepresentation.AssetPrimType.Quad:
+                    return VrXmlRepresentation.AssetType.Quad;
+                case EntityRepresentation.AssetPrimType.Sphere:
+                    return VrXmlRepresentation.AssetType.Sphere;
+                case EntityRepresentation.AssetPrimType.None:
+                    return VrXmlRepresentation.AssetType.None;
+            }
+            return VrXmlRepresentation.AssetType.None;
+        }
+
+        protected VrXmlRepresentation.AssetType ConvertMeshToAssetType(Mesh mesh)
+        {
+            if (mesh)
+            {
+                switch (mesh.name)
+                {
+                    case "Cube":
+                        return VrXmlRepresentation.AssetType.Cube;
+                    case "Sphere":
+                        return VrXmlRepresentation.AssetType.Sphere;
+                    case "Cylinder":
+                        return VrXmlRepresentation.AssetType.Cylinder;
+                    case "Capsule":
+                        return VrXmlRepresentation.AssetType.Capsule;
+                    case "Quad":
+                        return VrXmlRepresentation.AssetType.Quad;
+                    case "Plane":
+                        return VrXmlRepresentation.AssetType.Plane;
+                }
+            }
+            return VrXmlRepresentation.AssetType.None;
+        }
+
+
+        protected void UpdateEntity(GameObject sourceGameObject, VrXmlEntityData data)
         {
             bool zUp = OriginalUpAxisIsZ;
             var entityInfo = sourceGameObject.GetComponent<EntityData>();
@@ -228,30 +290,7 @@ namespace VRSimTk
                         data.representation.importOptions = entityInfo.activeRepresentation.importOptions;
                         break;
                     case EntityRepresentation.AssetType.Primitive:
-                        switch (entityInfo.activeRepresentation.assetPrimType)
-                        {
-                            case EntityRepresentation.AssetPrimType.Capsule:
-                                data.representation.assetType = VrXmlRepresentation.AssetType.Capsule;
-                                break;
-                            case EntityRepresentation.AssetPrimType.Cube:
-                                data.representation.assetType = VrXmlRepresentation.AssetType.Cube;
-                                break;
-                            case EntityRepresentation.AssetPrimType.Cylinder:
-                                data.representation.assetType = VrXmlRepresentation.AssetType.Cylinder;
-                                break;
-                            case EntityRepresentation.AssetPrimType.Plane:
-                                data.representation.assetType = VrXmlRepresentation.AssetType.Plane;
-                                break;
-                            case EntityRepresentation.AssetPrimType.Quad:
-                                data.representation.assetType = VrXmlRepresentation.AssetType.Quad;
-                                break;
-                            case EntityRepresentation.AssetPrimType.Sphere:
-                                data.representation.assetType = VrXmlRepresentation.AssetType.Sphere;
-                                break;
-                            case EntityRepresentation.AssetPrimType.None:
-                                data.representation.assetType = VrXmlRepresentation.AssetType.None;
-                                break;
-                        }
+                        data.representation.assetType = ConvertRepresentationPrimType(entityInfo.activeRepresentation.assetPrimType);
                         break;
                     case EntityRepresentation.AssetType.None:
                         data.representation.assetType = VrXmlRepresentation.AssetType.None;
@@ -286,65 +325,12 @@ namespace VRSimTk
                     data.representation.assetBundleName = null;
                     data.representation.assetName = null;
                     Mesh mesh = entityInfo.GetComponent<MeshFilter>().sharedMesh;
-                    if (mesh)
-                    {
-                        switch (mesh.name)
-                        {
-                            case "Cube":
-                                data.representation.assetType = VrXmlRepresentation.AssetType.Cube;
-                                break;
-                            case "Sphere":
-                                data.representation.assetType = VrXmlRepresentation.AssetType.Sphere;
-                                break;
-                            case "Cylinder":
-                                data.representation.assetType = VrXmlRepresentation.AssetType.Cylinder;
-                                break;
-                            case "Capsule":
-                                data.representation.assetType = VrXmlRepresentation.AssetType.Capsule;
-                                break;
-                            case "Quad":
-                                data.representation.assetType = VrXmlRepresentation.AssetType.Quad;
-                                break;
-                            case "Plane":
-                                data.representation.assetType = VrXmlRepresentation.AssetType.Plane;
-                                break;
-                        }
-                    }
+                    data.representation.assetType = ConvertMeshToAssetType(mesh);
                 }
             }
 
             data.description = entityInfo.description;
             data.localTransform.FromTransform(sourceGameObject.transform, zUp);
-            ////data.localTransform.position = CsConv.VecToVec(sourceGameObject.transform.localPosition);
-            ////////if(data.localTransform.useRotationMatrix)
-            ////////{
-            ////////    data.localTransform.rotationMatrix.FromMatrix4x4(CsConv.QuatToRotMat(sourceGameObject.transform.localRotation));
-            ////////}
-            ////////else
-            ////////{
-            ////////    data.localTransform.eulerAngles = sourceGameObject.transform.localEulerAngles;
-            ////////}
-            ////data.localTransform.useRotationMatrix = false;
-            ////data.localTransform.rotationMatrix.FromMatrix4x4(TrUtil.RotationToMatrix(sourceGameObject.transform.localRotation));
-            ////data.localTransform.eulerAngles.Set(sourceGameObject.transform.localEulerAngles, 2);
-            ////data.localTransform.scale = sourceGameObject.transform.localScale;
-            ////if (sourceGameObject.transform.parent)
-            ////{
-            ////    EntityData parentEntity = sourceGameObject.transform.parent.GetComponent<EntityData>();
-            ////    if (parentEntity)
-            ////    {
-            ////        data.localTransform.relToId = sourceGameObject.transform.parent.GetComponent<EntityData>().id;
-            ////    }
-            ////    else
-            ////    {
-            ////        Debug.LogErrorFormat("Entity {0} is relative to non-entity object {1} (hierarchy will be lost)",
-            ////            sourceGameObject.name, sourceGameObject.transform.parent.name);
-            ////    }
-            ////}
-            ////else
-            ////{
-            ////    data.localTransform.relToId = string.Empty;
-            ////}
             scenarioData.relationshipList.RemoveAll(x => x.ownerEntityId == entityInfo.id);
             foreach (var rel in sourceGameObject.GetComponents<Relationship>())
             {
@@ -352,7 +338,7 @@ namespace VRSimTk
             }
         }
 
-        public Relationship ConvertEntityRelationship(VrXmlRelationship xmlRel)
+        protected Relationship ConvertEntityRelationship(VrXmlRelationship xmlRel)
         {
             GameObject ownerObject = string.IsNullOrEmpty(xmlRel.ownerEntityId) ? gameObject : entityObjects[xmlRel.ownerEntityId];
             Relationship rel = null;
@@ -415,7 +401,7 @@ namespace VRSimTk
             return rel;
         }
 
-        public EntityHistory ConvertEntityHistory(VrXmlHistoryData xmlHistory)
+        protected EntityHistory ConvertEntityHistory(VrXmlHistoryData xmlHistory)
         {
             GameObject ownerObject = string.IsNullOrEmpty(xmlHistory.entityId) ? gameObject : entityObjects[xmlHistory.entityId];
             EntityHistory history = ownerObject.AddComponent<EntityHistory>();
@@ -424,19 +410,46 @@ namespace VRSimTk
             return history;
         }
 
-        public override bool ReadScenario(string url)
+        protected PrimitiveType ConvertAssetTypeToPrimType(VrXmlRepresentation.AssetType assetType)
         {
-            return DataUtil.ReadFromXml(ref scenarioData, url);
+            switch(assetType)
+            {
+                    case VrXmlRepresentation.AssetType.Cube:
+                        return PrimitiveType.Cube;
+                    case VrXmlRepresentation.AssetType.Sphere:
+                    return PrimitiveType.Sphere;
+                    case VrXmlRepresentation.AssetType.Cylinder:
+                    return PrimitiveType.Cylinder;
+                    case VrXmlRepresentation.AssetType.Capsule:
+                    return PrimitiveType.Capsule;
+                    case VrXmlRepresentation.AssetType.Quad:
+                    return PrimitiveType.Quad;
+                    case VrXmlRepresentation.AssetType.Plane:
+                    return PrimitiveType.Plane;
+            }
+            Debug.LogError("Asset type "+assetType.ToString()+" not mapped to a primitive.");
+                        return PrimitiveType.Cube;
         }
 
-        public override bool WriteScenario(string url)
+        protected EntityRepresentation.AssetPrimType ConvertAssetTypeToAssetPrimType(VrXmlRepresentation.AssetType assetType)
         {
-            if (scenarioData == null)
+            switch(assetType)
             {
-                Debug.LogWarning(GetType() + " - No data to write.");
-                return false;
+                    case VrXmlRepresentation.AssetType.Cube:
+                    return EntityRepresentation.AssetPrimType.Cube;
+                    case VrXmlRepresentation.AssetType.Sphere:
+                    return EntityRepresentation.AssetPrimType.Sphere;
+                    case VrXmlRepresentation.AssetType.Cylinder:
+                    return EntityRepresentation.AssetPrimType.Cylinder;
+                    case VrXmlRepresentation.AssetType.Capsule:
+                    return EntityRepresentation.AssetPrimType.Capsule;
+                    case VrXmlRepresentation.AssetType.Quad:
+                    return EntityRepresentation.AssetPrimType.Quad;
+                    case VrXmlRepresentation.AssetType.Plane:
+                    return EntityRepresentation.AssetPrimType.Plane;
             }
-            return DataUtil.WriteToXml(scenarioData, url);
+            Debug.LogError("Asset type " + assetType.ToString() + " not mapped to an asset primitive type.");
+            return EntityRepresentation.AssetPrimType.None;
         }
 
         protected IEnumerator CreateRepresentationObject(EntityData entityData, VrXmlRepresentation representation)
@@ -508,28 +521,13 @@ namespace VRSimTk
                         }
                         break;
                     case VrXmlRepresentation.AssetType.Cube:
-                        primitiveCreated = PrimitiveType.Cube;
-                        primType = EntityRepresentation.AssetPrimType.Cube;
-                        break;
                     case VrXmlRepresentation.AssetType.Sphere:
-                        primitiveCreated = PrimitiveType.Sphere;
-                        primType = EntityRepresentation.AssetPrimType.Sphere;
-                        break;
                     case VrXmlRepresentation.AssetType.Cylinder:
-                        primitiveCreated = PrimitiveType.Cylinder;
-                        primType = EntityRepresentation.AssetPrimType.Cylinder;
-                        break;
                     case VrXmlRepresentation.AssetType.Capsule:
-                        primitiveCreated = PrimitiveType.Capsule;
-                        primType = EntityRepresentation.AssetPrimType.Capsule;
-                        break;
                     case VrXmlRepresentation.AssetType.Quad:
-                        primitiveCreated = PrimitiveType.Quad;
-                        primType = EntityRepresentation.AssetPrimType.Quad;
-                        break;
                     case VrXmlRepresentation.AssetType.Plane:
-                        primitiveCreated = PrimitiveType.Plane;
-                        primType = EntityRepresentation.AssetPrimType.Plane;
+                        primitiveCreated = ConvertAssetTypeToPrimType(representation.assetType);
+                        primType = ConvertAssetTypeToAssetPrimType(representation.assetType);
                         break;
                 }
                 if (primitiveCreated.HasValue)
@@ -546,7 +544,7 @@ namespace VRSimTk
                         entityRepr.assetType = EntityRepresentation.AssetType.Primitive;
                         entityRepr.assetPrimType = primType;
                         entityRepr.name = representation.id;
-                        if(string.IsNullOrEmpty(entityRepr.name))
+                        if (string.IsNullOrEmpty(entityRepr.name))
                         {
                             entityRepr.name = primitiveCreated.Value.ToString();
                         }
@@ -743,7 +741,7 @@ namespace VRSimTk
                 scenarioData.simulation.description = simController.simulationHistory.description;
                 scenarioData.simulation.details = simController.simulationHistory.details;
             }
-            //scenarioData.entityList.RemoveAll(x => !entityObjects.ContainsKey(x.id));
+
             foreach (var entry in entityObjects)
             {
                 var data = scenarioData.entityList.Find(x => x.id == entry.Key);
