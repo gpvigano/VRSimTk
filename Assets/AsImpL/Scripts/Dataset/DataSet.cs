@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 namespace AsImpL
@@ -13,22 +13,27 @@ namespace AsImpL
         /// <summary>
         /// List of objects
         /// </summary>
-        public List<ObjectData> objectList;
+        public List<ObjectData> objectList = new List<ObjectData>();
 
         /// <summary>
         /// List of vertices
         /// </summary>
-        public List<Vector3> vertList;
+        public List<Vector3> vertList = new List<Vector3>();
 
         /// <summary>
         /// List of texture coordinates (UV)
         /// </summary>
-        public List<Vector2> uvList;
+        public List<Vector2> uvList = new List<Vector2>();
 
         /// <summary>
         /// List of normals
         /// </summary>
-        public List<Vector3> normalList;
+        public List<Vector3> normalList = new List<Vector3>();
+
+        /// <summary>
+        /// List of colors
+        /// </summary>
+        public List<Color> colorList = new List<Color>();
 
         // naming index for unnamed group (e.g. "Unnamed-1")
         private int unnamedGroupIndex = 1;
@@ -36,17 +41,63 @@ namespace AsImpL
 
         private FaceGroupData currGroup;
 
+        private bool noFaceDefined = true;
+
+        /// <summary>
+        /// Name of the current group.
+        /// </summary>
+        public string CurrGroupName
+        {
+            get
+            {
+                return currGroup != null ? currGroup.name : "";
+            }
+        }
+
         /// <summary>
         /// Check if there is no vertex defined.
         /// </summary>
-        public bool IsEmpty { get { return vertList.Count == 0; } }
+        public bool IsEmpty
+        {
+            get
+            {
+                return vertList.Count == 0;
+            }
+        }
+
+        /// <summary>
+        /// Get a string key based on the given face indices
+        /// </summary>
+        /// <param name="fi">face indices structure</param>
+        /// <returns></returns>
+        public static string GetFaceIndicesKey(FaceIndices fi)
+        {
+            return fi.vertIdx.ToString() + "/" + fi.uvIdx.ToString() + "/" + fi.normIdx.ToString();
+        }
+
+        /// <summary>
+        /// Change the material name to be compliant with Unity material asset naming.
+        /// </summary>
+        /// <param name="mtlName">original material name</param>
+        /// <returns>Returns the name modified to be compliant with Unity material asset naming.</returns>
+        public static string FixMaterialName(string mtlName)
+        {
+            return mtlName
+                .Replace(':', '_')
+                .Replace('\\', '_')
+                .Replace('/', '_')
+                .Replace('*', '_')
+                .Replace('?', '_')
+                .Replace('<', '_')
+                .Replace('>', '_')
+                .Replace('|', '_');
+        }
 
         /// <summary>
         /// Constructor: create data lists and initialzize the default object.
         /// </summary>
         public DataSet()
         {
-            objectList = new List<ObjectData>();
             ObjectData d = new ObjectData();
             d.name = "default";
             objectList.Add(d);
@@ -56,10 +107,6 @@ namespace AsImpL
             g.name = "default";
             d.faceGroups.Add(g);
             currGroup = g;
-
-            vertList = new List<Vector3>();
-            uvList = new List<Vector2>();
-            normalList = new List<Vector3>();
         }
 
         /// <summary>
@@ -71,7 +118,7 @@ namespace AsImpL
             //Debug.Log("Adding new object " + name + ". Current is empty: " + isEmpty);
             string currentMaterial = currObjData.faceGroups[currObjData.faceGroups.Count - 1].materialName;
 
-            if (IsEmpty) objectList.Remove(currObjData);
+            if (noFaceDefined) objectList.Remove(currObjData);
 
             ObjectData objData = new ObjectData();
             objData.name = objectName;
@@ -148,11 +195,22 @@ namespace AsImpL
         }
 
         /// <summary>
+        /// Add a new color to the global list
+        /// </summary>
+        /// <param name="color">color</param>
+        public void AddColor(Color color)
+        {
+            colorList.Add(color);
+            currObjData.hasColors = true;
+        }
+
+        /// <summary>
         /// Add a new face indices entry to the current faces group
         /// </summary>
         /// <param name="faceIdx">new vertex indices</param>
         public void AddFaceIndices(FaceIndices faceIdx)
         {
+            noFaceDefined = false;
             currGroup.faces.Add(faceIdx);
             currObjData.allFaces.Add(faceIdx);
             if (faceIdx.normIdx >= 0)
@@ -198,14 +256,12 @@ namespace AsImpL
         public class ObjectData
         {
             public string name;
-            public List<FaceGroupData> faceGroups;
-            public List<FaceIndices> allFaces;
-            public bool hasNormals;
+            public List<FaceGroupData> faceGroups = new List<FaceGroupData>();
+            public List<FaceIndices> allFaces = new List<FaceIndices>();
+            public bool hasNormals = false;
+            public bool hasColors = false;
             public ObjectData()
             {
-                faceGroups = new List<FaceGroupData>();
-                allFaces = new List<FaceIndices>();
-                hasNormals = false;
             }
         }
 

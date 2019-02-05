@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Networking;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -53,6 +54,8 @@ namespace AsImpL
         protected FileLoadingProgress objLoadingProgress = new FileLoadingProgress();
 
         protected Stats loadStats;
+
+        private Texture2D loadedTexture = null;
 
         /// <summary>
         /// Load the file assuming its vertical axis is Z instead of Y 
@@ -156,6 +159,9 @@ namespace AsImpL
             Debug.LogFormat("Loading {0}\n  from: {1}...", objName, absolutePath);
 
             yield return null;
+
+            // TODO: implementation of a caching mechanism for models downloaded from an URL
+
             // if the model was already loaded duplicate the existing object
             if (buildOptions != null && buildOptions.reuseLoaded && loadedModels.ContainsKey(absolutePath) && loadedModels[absolutePath] != null)
             {
@@ -168,7 +174,6 @@ namespace AsImpL
                     yield return null;
                 }
 
-                // TODO: option to reload the object
 
                 GameObject newObj = Instantiate(loadedModels[absolutePath]);
                 yield return newObj;
@@ -248,7 +253,6 @@ namespace AsImpL
         protected IEnumerator Build(string absolutePath, string objName, Transform parentTransform)
         {
             float prevTime = Time.realtimeSinceStartup;
-            WWW loader = null;
             if (materialData != null)
             {
                 string basePath = GetDirName(absolutePath);
@@ -268,19 +272,8 @@ namespace AsImpL
                         else
 #endif
                         {
-                            //mtl.diffuseTex = TextureLoader.LoadTexture(basePath + mtl.diffuseTexPath);
-                            string texPath = GetTextureUrl(basePath, mtl.diffuseTexPath);
-                            loader = new WWW(texPath);
-                            yield return loader;
-
-                            if (loader.error != null)
-                            {
-                                Debug.LogError(loader.error);
-                            }
-                            else
-                            {
-                                mtl.diffuseTex = LoadTexture(loader);
-                            }
+                            yield return LoadMaterialTexture(basePath, mtl.diffuseTexPath);
+                            mtl.diffuseTex = loadedTexture;
                         }
                     }
 
@@ -294,19 +287,8 @@ namespace AsImpL
                         else
 #endif
                         {
-                            //mtl.bumpTex = TextureLoader.LoadTexture(basePath + mtl.bumpTexPath);
-                            string texPath = GetTextureUrl(basePath, mtl.bumpTexPath);
-                            loader = new WWW(texPath);
-                            yield return loader;
-
-                            if (loader.error != null)
-                            {
-                                Debug.LogError(loader.error);
-                            }
-                            else
-                            {
-                                mtl.bumpTex = LoadTexture(loader);
-                            }
+                            yield return LoadMaterialTexture(basePath, mtl.bumpTexPath);
+                            mtl.bumpTex = loadedTexture;
                         }
                     }
 
@@ -320,19 +302,8 @@ namespace AsImpL
                         else
 #endif
                         {
-                            //mtl.specularTex = TextureLoader.LoadTexture(basePath + mtl.specularTexPath);
-                            string texPath = GetTextureUrl(basePath, mtl.specularTexPath);
-                            loader = new WWW(texPath);
-                            yield return loader;
-
-                            if (loader.error != null)
-                            {
-                                Debug.LogError(loader.error);
-                            }
-                            else
-                            {
-                                mtl.specularTex = LoadTexture(loader);
-                            }
+                            yield return LoadMaterialTexture(basePath, mtl.specularTexPath);
+                            mtl.specularTex = loadedTexture;
                         }
                     }
 
@@ -346,19 +317,8 @@ namespace AsImpL
                         else
 #endif
                         {
-                            //mtl.opacityTex = TextureLoader.LoadTexture(basePath+mtl.opacityTexPath);
-                            string texPath = GetTextureUrl(basePath, mtl.opacityTexPath);
-                            loader = new WWW(texPath);
-                            yield return loader;
-
-                            if (loader.error != null)
-                            {
-                                Debug.LogError(loader.error);
-                            }
-                            else
-                            {
-                                mtl.opacityTex = LoadTexture(loader);
-                            }
+                            yield return LoadMaterialTexture(basePath, mtl.opacityTexPath);
+                            mtl.opacityTex = loadedTexture;
                         }
                     }
                 }
@@ -374,15 +334,20 @@ namespace AsImpL
             objectBuilder.alternativeTexPath = altTexPath;
 #endif
             objectBuilder.buildOptions = buildOptions;
-            objectBuilder.InitBuilMaterials(materialData);
+            bool hasColors = dataSet.colorList.Count > 0;
+            bool hasMaterials = materialData != null;
+            objectBuilder.InitBuildMaterials(materialData, hasColors);
             float objInitPerc = objLoadingProgress.percentage;
-            while (objectBuilder.BuildMaterials(info))
+            if (hasMaterials)
             {
-                objLoadingProgress.percentage = objInitPerc + MATERIAL_PHASE_PERC * objectBuilder.NumImportedMaterials / materialData.Count;
-                yield return null;
+                while (objectBuilder.BuildMaterials(info))
+                {
+                    objLoadingProgress.percentage = objInitPerc + MATERIAL_PHASE_PERC * objectBuilder.NumImportedMaterials / materialData.Count;
+                    yield return null;
+                }
+                loadStats.buildStats.materialsTime = Time.realtimeSinceStartup - prevTime;
+                prevTime = Time.realtimeSinceStartup;
             }
-            loadStats.buildStats.materialsTime = Time.realtimeSinceStartup - prevTime;
-            prevTime = Time.realtimeSinceStartup;
 
             objLoadingProgress.message = "Building scene objects...";
 
@@ -443,6 +408,15 @@ namespace AsImpL
                     obj.transform.localPosition = buildOptions.localPosition;
                     obj.transform.localRotation = Quaternion.Euler(buildOptions.localEulerAngles); ;
                     obj.transform.localScale = buildOptions.localScale;
+                    if (buildOptions.inheritLayer)
+                    {
+                        obj.layer = obj.transform.parent.gameObject.layer;
+                        MeshRenderer[] mrs = obj.transform.GetComponentsInChildren<MeshRenderer>(true);
+                        for (int i = 0; i < mrs.Length; i++)
+                        {
+                            mrs[i].gameObject.layer = obj.transform.parent.gameObject.layer;
+                        }
+                    }
                 }
                 if (ModelLoaded != null)
                 {
@@ -513,12 +487,48 @@ namespace AsImpL
             return texPath;
         }
 
+        private IEnumerator LoadMaterialTexture(string basePath, string path)
+        {
+            loadedTexture = null;
+            string texPath = GetTextureUrl(basePath, path);
+#if UNITY_2018_3_OR_NEWER
+            using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(texPath))
+            {
+                yield return uwr.SendWebRequest();
+
+                if (uwr.isNetworkError || uwr.isHttpError)
+                {
+                    Debug.LogError(uwr.error);
+                }
+                else
+                {
+                    // Get downloaded asset bundle
+                    loadedTexture = DownloadHandlerTexture.GetContent(uwr);
+                }
+            }
+#else
+            WWW loader = new WWW(texPath);
+            yield return loader;
+
+            if (loader.error != null)
+            {
+                Debug.LogError(loader.error);
+            }
+            else
+            {
+                loadedTexture = LoadTexture(loader);
+            }
+#endif
+        }
+
         /// <summary>
-        /// Load a texture from a URL using a WWW
+        /// Load a texture from the URL got from the parameter.
         /// </summary>
-        /// <param name="loader">WWW object (already loaded)</param>
-        /// <returns>The texturee loaded</returns>
+#if UNITY_2018_3_OR_NEWER
+        private Texture2D LoadTexture(UnityWebRequest loader)
+#else
         private Texture2D LoadTexture(WWW loader)
+#endif
         {
             string ext = Path.GetExtension(loader.url).ToLower();
             Texture2D tex = null;
@@ -526,12 +536,16 @@ namespace AsImpL
             // TODO: add support for more formats (bmp, gif, dds, ...)
             if (ext == ".tga")
             {
-                tex = TextureLoader.LoadTexture(loader);
+                tex = TextureLoader.LoadTextureFromUrl(loader.url);
                 //tex = TgaLoader.LoadTGA(new MemoryStream(loader.bytes));
             }
             else if (ext == ".png" || ext == ".jpg" || ext == ".jpeg")
             {
+#if UNITY_2018_3_OR_NEWER
+                tex = DownloadHandlerTexture.GetContent(loader);
+#else
                 tex = loader.texture;
+#endif
             }
             else
             {

@@ -1,6 +1,6 @@
 # VRSimTk
 ### Virtual Reality Simulation Toolkit for Unity
-**Requires Unity 5.5.3 or higher.**
+**Requires Unity 5.5.4 or higher.**
 
 This project aims to provide a framework for the development of Virtual Environments, able to interoperate with data coming from decoupled simulations.
 Currently an XML data exchange module has been developed, but the final goal is to have a framework for the development of other *connectors*.
@@ -28,18 +28,17 @@ Currently an XML data exchange module has been developed, but the final goal is 
   * sample simulation
 
 ## Documentation
-A menu *AsImpL* is added to the Unity Editor main menu, with a sub-menu
-*Import OBJ model* that opens a window. In this window you can set paths
-and import settings, then you can press *Import* to start importing the
+A sub-menu *Import OBJ model [AsImpL]* is added to the Unity Editor Asset menu.
+It opens a window where you can set paths and import settings, then you can press *Import* to start importing the
 selected model. A progress bar shows the import progress and phase until
 the model has been loaded (or until you press *Cancel* to abort the
-process). A utility menu item `Capture screenshot` was added to take
+process). To the Window menu a sub-menu item `Capture screenshot [AsImpL]` is added to take
 a screenshot, the file is named automatically and saved into the main
 project folder, then the folder is opened in your file manager.
 
 An example scene is provided to demonstrate how a simulation can be
 imported/exported from/to XML. You can find this in the set of scenes
-named `TestSim`*.
+named `TestSim*`.
 
 The code in this project *should* be prepared to be extended for supporting other data sources.
 Even if the only supported format is currently XML, the idea is to create a common framework on which the support for other data sources could be developed, allowing the exchange of data with other applications.
@@ -62,7 +61,7 @@ Thanks in advance to all the people who will contribute in any way to this proje
 
 ### Contributing
 
-Contributions from you are welcome, but please notice that **this is still a work-in-progress**)!
+Contributions from you are welcome, but please notice that **this is still a work-in-progress**!
 
 If you find bugs or you have any new idea for improvements and new features you can raise an issue on GitHub. To open issues or make pull requests please follow the instructions in [CONTRIBUTING.md](https://github.com/gpvigano/VRSimTk/blob/master/CONTRIBUTING.md).
 

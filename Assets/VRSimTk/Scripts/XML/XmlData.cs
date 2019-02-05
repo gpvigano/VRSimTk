@@ -136,7 +136,7 @@ namespace VRSimTk
     /// Auxiliary rotation matrix for rotation serialization
     /// </summary>
     /// <remarks>Values of the rotation matrix are not kept as they are
-    /// by Unity, in particular when calling Quaternin methods, so this
+    /// by Unity, in particular when calling Quaternion methods, so this
     /// class is here to round values and discard precision errors,
     /// otherwise these errors accumulate over each read and write
     /// iteration.
@@ -364,7 +364,7 @@ namespace VRSimTk
         [XmlArray("relationships")]
         public List<VrXmlRelationship> relationshipList = new List<VrXmlRelationship>();
         // Default constructor needed by XmlSerializer
-        public VrXmlSceneData() : base()
+        public VrXmlSceneData()
         {
             // list of variants (aka representation contexts)
             // if the first one is not available try the second one and so on

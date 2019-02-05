@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.IO;
-#if UNITY_EDITOR
-#endif
+using System.Globalization;
 
 namespace AsImpL
 {
@@ -38,6 +38,7 @@ namespace AsImpL
     public class LoaderObj : Loader
     {
         private string mtlLib;
+        private string loadedText;
 
         /// <summary>
         /// Parse dependencies of the given OBJ file.
@@ -85,46 +86,51 @@ namespace AsImpL
         protected override IEnumerator LoadModelFile(string absolutePath)
         {
             string url = absolutePath.Contains("//") ? absolutePath : "file:///" + absolutePath;
-            WWW www = new WWW(url);
-            yield return www;
+            yield return LoadOrDownloadText(url);
 
-            if (string.IsNullOrEmpty(www.text))
+            if (string.IsNullOrEmpty(loadedText))
             {
-                Debug.LogError("Failed to load " + www.url);
-                objLoadingProgress.message = "Failed to load " + www.url;
+                Debug.LogError("Failed to load " + loadedText);
+                objLoadingProgress.message = "Failed to load " + loadedText;
                 objLoadingProgress.error = true;
                 //totalProgress.fileProgress.Remove( objLoadingProgress );
                 yield break;
             }
             //Debug.LogFormat("Parsing geometry data in {0}...", www.url);
 
-            yield return ParseGeometryData(www.text);
+            yield return ParseGeometryData(loadedText);
         }
 
         protected override IEnumerator LoadMaterialLibrary(string absolutePath)
         {
             string mtlPath;
-            if(absolutePath.Contains("//"))
+            if (absolutePath.Contains("//"))
             {
-                mtlPath = absolutePath.Remove(absolutePath.LastIndexOf('/')+1) + mtlLib;
+                int pos;
+                // handle the special case of a PHP URL containing "...?...=model.obj"
+                if (absolutePath.Contains("?"))
+                {
+                    // in this case try to get the library path reading until last "=".
+                    pos = absolutePath.LastIndexOf('=');
+                }
+                else
+                {
+                    pos = absolutePath.LastIndexOf('/');
+                }
+                mtlPath = absolutePath.Remove(pos + 1) + mtlLib;
             }
             else
             {
                 string basePath = GetDirName(absolutePath);
                 mtlPath = "file:///" + basePath + mtlLib;
             }
-            WWW loader = new WWW(mtlPath);
-            yield return loader;
+            yield return LoadOrDownloadText(mtlPath);
 
-            if (loader.error != null)
-            {
-                Debug.LogError(loader.error);
-            }
-            else
+            if (loadedText != null)
             {
                 //Debug.LogFormat("Parsing material libray {0}...", loader.url);
                 objLoadingProgress.message = "Parsing material libray...";
-                ParseMaterialData(loader.text);
+                ParseMaterialData(loadedText);
             }
 
         }
@@ -202,8 +208,18 @@ namespace AsImpL
                 y *= Scaling;
                 z *= Scaling;
             }
-            if (ConvertVertAxis) return new Vector3(-x, z, -y);
-            return new Vector3(-x, y, z);
+            if (ConvertVertAxis) return new Vector3(x, z, y);
+            return new Vector3(x, y, -z);
+        }
+
+        /// <summary>
+        /// Parse a string to get a floating point number using the invariant culture.
+        /// </summary>
+        /// <param name="floatString">String with the number to be parsed</param>
+        /// <returns>The parsed floating point number.</returns>
+        private float ParseFloat(string floatString)
+        {
+            return float.Parse(floatString, CultureInfo.InvariantCulture.NumberFormat);
         }
 
         /// <summary>
@@ -253,44 +269,47 @@ namespace AsImpL
                         dataSet.AddGroup(parameters);
                         break;
                     case "v":
-                        dataSet.AddVertex(ConvertVec3(float.Parse(p[1]), float.Parse(p[2]), float.Parse(p[3])));
+                        dataSet.AddVertex(ConvertVec3(ParseFloat(p[1]), ParseFloat(p[2]), ParseFloat(p[3])));
+                        if (p.Length >= 7)
+                        {
+                            // 7 for "v x y z r g b"
+                            // 8 for "v x y z r g b w"
+                            // w is the weight required for rational curves and surfaces. It is
+                            // not required for non - rational curves and surfaces.If you do not
+                            // specify a value for w, the default is 1.0. [http://paulbourke.net/dataformats/obj/]
+                            dataSet.AddColor(new Color(ParseFloat(p[4]), ParseFloat(p[5]), ParseFloat(p[6]), 1f));
+                        }
                         break;
                     case "vt":
-                        dataSet.AddUV(new Vector2(float.Parse(p[1]), float.Parse(p[2])));
+                        dataSet.AddUV(new Vector2(ParseFloat(p[1]), ParseFloat(p[2])));
                         break;
                     case "vn":
-                        dataSet.AddNormal(ConvertVec3(float.Parse(p[1]), float.Parse(p[2]), float.Parse(p[3])));
+                        dataSet.AddNormal(ConvertVec3(ParseFloat(p[1]), ParseFloat(p[2]), ParseFloat(p[3])));
                         break;
                     case "f":
                         {
                             int numVerts = p.Length - 1;
-                            DataSet.FaceIndices[] faces = new DataSet.FaceIndices[numVerts];
+                            DataSet.FaceIndices[] face = new DataSet.FaceIndices[numVerts];
                             if (isFirstInGroup)
                             {
                                 isFirstInGroup = false;
                                 string[] c = p[1].Trim().Split("/".ToCharArray());
                                 isFaceIndexPlus = (int.Parse(c[0]) >= 0);
                             }
-                            GetFaceIndicesByOneFaceLine(faces, p, isFaceIndexPlus);
+                            GetFaceIndicesByOneFaceLine(face, p, isFaceIndexPlus);
                             if (numVerts == 3)
                             {
-                                dataSet.AddFaceIndices(faces[0]);
-                                dataSet.AddFaceIndices(faces[2]);
-                                dataSet.AddFaceIndices(faces[1]);
-                            }
-                            else if (numVerts == 4)
-                            {
-                                dataSet.AddFaceIndices(faces[0]);
-                                dataSet.AddFaceIndices(faces[3]);
-                                dataSet.AddFaceIndices(faces[1]);
-                                dataSet.AddFaceIndices(faces[3]);
-                                dataSet.AddFaceIndices(faces[2]);
-                                dataSet.AddFaceIndices(faces[1]);
+                                dataSet.AddFaceIndices(face[0]);
+                                dataSet.AddFaceIndices(face[2]);
+                                dataSet.AddFaceIndices(face[1]);
                             }
                             else
                             {
-                                Debug.LogWarning("face vertex count :" + (p.Length - 1) + " larger than 4");
-                                // TODO: support for faces with more than 4 vertices
+                                // Triangulate the polygon
+                                // TODO: Texturing and lighting work better with a triangulation that maximizes triangles areas.
+                                // TODO: the following true must be replaced to a proper option (disabled by default) as soon as a proper triangulation method is implemented.
+                                Triangulator.Triangulate(dataSet, face);
+                                // TODO: Maybe triangulation could be done in ObjectImporter instead.
                             }
                         }
                         break;
@@ -303,7 +322,7 @@ namespace AsImpL
                     case "usemtl":
                         if (!string.IsNullOrEmpty(parameters))
                         {
-                            dataSet.AddMaterialName(parameters);
+                            dataSet.AddMaterialName(DataSet.FixMaterialName(parameters));
                         }
                         break;
                 }
@@ -394,7 +413,7 @@ namespace AsImpL
                     {
                         case "newmtl":
                             current = new MaterialData();
-                            current.materialName = parameters;
+                            current.materialName = DataSet.FixMaterialName(parameters);
                             mtlData.Add(current);
                             break;
                         case "Ka": // Ambient component (not supported)
@@ -406,15 +425,19 @@ namespace AsImpL
                         case "Ks": // Specular component
                             current.specularColor = StringsToColor(p);
                             break;
+                        case "Ke": // Specular component
+                            current.emissiveColor = StringsToColor(p);
+                            break;
                         case "Ns": // Specular exponent --> shininess
-                            current.shininess = float.Parse(p[1]);
+                            current.shininess = ParseFloat(p[1]);
                             break;
                         case "d": // dissolve into the background (1=opaque, 0=transparent)
-                            current.overallAlpha = p.Length > 1 && p[1] != "" ? float.Parse(p[1]) : 1.0f;
+                            current.overallAlpha = p.Length > 1 && p[1] != "" ? ParseFloat(p[1]) : 1.0f;
                             break;
                         case "Tr": // Transparency
-                            current.overallAlpha = p.Length > 1 && p[1] != "" ? 1.0f - float.Parse(p[1]) : 1.0f;
+                            current.overallAlpha = p.Length > 1 && p[1] != "" ? 1.0f - ParseFloat(p[1]) : 1.0f;
                             break;
+                        case "map_KD":
                         case "map_Kd": // Color texture, diffuse reflectivity
                             if (!string.IsNullOrEmpty(parameters))
                             {
@@ -422,7 +445,8 @@ namespace AsImpL
                             }
                             break;
                         // TODO: different processing needed, options not supported
-                        case "map_kS": // specular reflectivity of the material
+                        case "map_Ks": // specular reflectivity of the material
+                        case "map_kS":
                         case "map_Ns": // Scalar texture for specular exponent
                             if (!string.IsNullOrEmpty(parameters))
                             {
@@ -454,6 +478,7 @@ namespace AsImpL
                                 current.hasReflectionTex = true;
                             }
                             break;
+                        case "map_Ka": // ambient reflectivity color texture
                         case "map_kA":
                             if (!string.IsNullOrEmpty(parameters))
                             {
@@ -563,7 +588,37 @@ namespace AsImpL
 
         private Color StringsToColor(string[] p)
         {
-            return new Color(float.Parse(p[1]), float.Parse(p[2]), float.Parse(p[3]));
+            return new Color(ParseFloat(p[1]), ParseFloat(p[2]), ParseFloat(p[3]));
+        }
+
+        private IEnumerator LoadOrDownloadText(string url)
+        {
+#if UNITY_2018_3_OR_NEWER
+            UnityWebRequest uwr = UnityWebRequest.Get(url);
+            yield return uwr.SendWebRequest();
+
+            if (uwr.isNetworkError || uwr.isHttpError)
+            {
+                Debug.LogError(uwr.error);
+            }
+            else
+            {
+                // Get downloaded asset bundle
+                loadedText = uwr.downloadHandler.text;
+            }
+#else
+            loadedText = null;
+            WWW www = new WWW(url);
+            yield return www;
+            if (www.error != null)
+            {
+                Debug.LogError("Error loading " + url + "\n" + www.error);
+            }
+            else
+            {
+                loadedText = www.text;
+            }
+#endif
         }
 
         /// <summary>

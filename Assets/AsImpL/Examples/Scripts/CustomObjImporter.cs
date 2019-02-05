@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
@@ -17,59 +17,15 @@ namespace AsImpL
         /// <summary>
         /// Read a configuration file and load the object listed there with their parameters and positions.
         /// </summary>
-        public class CustomObjImporter : ObjectImporter
+        public class CustomObjImporter : ObjImporterTest
         {
-            [Tooltip("Models to load on startup")]
-            public List<ModelImportInfo> objectList = new List<ModelImportInfo>();
-
-            [Tooltip("Default scale for models loaded")]
-            public float defaultScale = 0.01f;
-
-            [Tooltip("Default vertical axis for models\ntrue = Z axis, false = Y axis")]
-            public bool defaultZUp = false;
-
-            [Tooltip("Text fordisplaying the overall scale")]
+            [Tooltip("Text for displaying the overall scale")]
             public Text objScalingText;
 
             [Tooltip("Configuration XML file (relative to the application data folder)")]
             public string configFile = "../object_list.xml";
 
             private List<ModelImportInfo> modelsToImport = new List<ModelImportInfo>();
-
-            /// <summary>
-            /// Load a set of files with their own import options
-            /// </summary>
-            /// <param name="modelsInfo">List of file import entries</param>
-            public void ImportModelListAsync(ModelImportInfo[] modelsInfo)
-            {
-                if (modelsInfo == null)
-                {
-                    return;
-                }
-                for (int i = 0; i < modelsInfo.Length; i++)
-                {
-                    if (modelsInfo[i].skip) continue;
-                    string objName = modelsInfo[i].name;
-                    string filePath = modelsInfo[i].path;
-                    if (string.IsNullOrEmpty(filePath))
-                    {
-                        Debug.LogWarning("File path missing");
-                        continue;
-                    }
-#if (UNITY_ANDROID || UNITY_IPHONE)
-                    filePath = Application.persistentDataPath + "/" + filePath;
-#endif
-                    ImportOptions options = modelsInfo[i].loaderOptions;
-                    if (options == null)
-                    {
-                        options = new ImportOptions();
-                        options.modelScaling = defaultScale;
-                        options.zUp = defaultZUp;
-                    }
-                    options.reuseLoaded = true;
-                    ImportModelAsync(objName, filePath, transform, options);
-                }
-            }
 
             private void Awake()
             {
@@ -80,8 +36,10 @@ namespace AsImpL
                 //configFile = Application.streamingAssetsPath + "/" + configFile;
             }
 
-            private void Start()
+            protected override void Start()
             {
+#if UNITY_STANDALONE
+#if !UNITY_EDITOR
                 string[] args = Environment.GetCommandLineArgs();
 
                 if (args != null && args.Length > 1)
@@ -115,9 +73,14 @@ namespace AsImpL
                     ImportModelListAsync(objectList.ToArray());
                 }
                 else
+#endif
                 {
                     Reload();
                 }
+#else
+                Debug.Log("Command line arguments not available, using default settings.");
+                Reload();
+#endif
             }
 
             public void SetScaling(float scl)
@@ -153,7 +116,7 @@ namespace AsImpL
                 XmlWriter w = XmlWriter.Create(stream, settings);
 
                 serializer.Serialize(w, objectList);
-                stream.Close();
+                stream.Dispose();
             }
 
             public void Reload()
@@ -168,7 +131,7 @@ namespace AsImpL
                     XmlSerializer serializer = new XmlSerializer(typeof(List<ModelImportInfo>));
                     FileStream stream = new FileStream(configFile, FileMode.Open);
                     objectList = (List<ModelImportInfo>)serializer.Deserialize(stream);
-                    stream.Close();
+                    stream.Dispose();
                     UpdateScene();
                     ImportModelListAsync(modelsToImport.ToArray());
                 }

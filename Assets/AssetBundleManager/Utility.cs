@@ -86,6 +86,7 @@ namespace AssetBundles
                 return AssetBundleSettings.AssetBundlesPath;
             }
             string path = Path.Combine(GetAssetBundlesBasePath(), AssetBundleSettings.AssetBundlesPath);
+            path = path.Replace(Path.DirectorySeparatorChar, '/');
             if (!path.EndsWith("/"))
             {
                 path += "/";

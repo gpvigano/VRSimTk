@@ -167,7 +167,7 @@ namespace AssetBundleWorkshop
             runAfterBuild = true;
             BuildPlayer();
         }
-        
+
         /// <summary>
         /// Build the application using the active build target
         /// </summary>
@@ -182,7 +182,7 @@ namespace AssetBundleWorkshop
             // Build and copy AssetBundles.
             BuildAssetBundles(EditorUserBuildSettings.activeBuildTarget, lastTargetBuildFolder);
             WriteServerURL();
-            BuildTk.BuildPlayer( outputPath, runAfterBuild);
+            BuildTk.BuildPlayer(outputPath, runAfterBuild);
         }
 
         /// <summary>
@@ -195,30 +195,30 @@ namespace AssetBundleWorkshop
             {
                 target = EditorUserBuildSettings.activeBuildTarget;
             }
-                bool isStandalone = false;
-                bool isLinux = false;
-                bool isWindows = false;
-                bool isOSX = false;
-                switch (target.Value)
-                {
-                    case BuildTarget.StandaloneWindows:
-                    case BuildTarget.StandaloneWindows64:
+            bool isStandalone = false;
+            bool isLinux = false;
+            bool isWindows = false;
+            bool isOSX = false;
+            switch (target.Value)
+            {
+                case BuildTarget.StandaloneWindows:
+                case BuildTarget.StandaloneWindows64:
                     isWindows = true;
-                    isStandalone =true;
+                    isStandalone = true;
                     break;
-                    case BuildTarget.StandaloneLinux:
-                    case BuildTarget.StandaloneLinux64:
-                    case BuildTarget.StandaloneLinuxUniversal:
+                case BuildTarget.StandaloneLinux:
+                case BuildTarget.StandaloneLinux64:
+                case BuildTarget.StandaloneLinuxUniversal:
                     isLinux = true;
-                    isStandalone =true;
+                    isStandalone = true;
                     break;
-                    case BuildTarget.StandaloneOSXIntel:
-                    case BuildTarget.StandaloneOSXIntel64:
-                    case BuildTarget.StandaloneOSXUniversal:
+                case BuildTarget.StandaloneOSXIntel:
+                case BuildTarget.StandaloneOSXIntel64:
+                case BuildTarget.StandaloneOSXUniversal:
                     isOSX = true;
                     isStandalone = true;
                     break;
-                }
+            }
             switch (AssetBundleSettings.AssetBundlesBasePath)
             {
                 case AssetBundleSettings.BasePathType.None:
